@@ -226,17 +226,9 @@ func reciver(c *gin.Context) {
 			return
 		}
 		control := make(chan bool, 10)
+		var first int = 1
 		peerConnection.OnICEConnectionStateChange(func(connectionState webrtc.ICEConnectionState) {
-			log.Printf("Connection State has changed %s \n", connectionState.String())
-			if connectionState != webrtc.ICEConnectionStateConnected {
-				log.Println("Client Close Exit")
-				err := peerConnection.Close()
-				if err != nil {
-					log.Println("peerConnection Close error", err)
-				}
-				control <- true
-				return
-			}
+			if first > 0 {
 			if connectionState == webrtc.ICEConnectionStateConnected {
 				go func() {
 					cuuid, ch := Config.clAd(suuid)
@@ -290,6 +282,8 @@ func reciver(c *gin.Context) {
 					}
 
 				}()
+				first = 0
+			}
 			}
 		})
 		return
